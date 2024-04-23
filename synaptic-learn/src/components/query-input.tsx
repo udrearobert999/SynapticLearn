@@ -2,7 +2,11 @@ import { FormEvent, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SendHorizontal } from "lucide-react";
 
-const QueryInput = () => {
+interface QueryInputProps {
+  onSubmit: () => void;
+}
+
+const QueryInput = ({ onSubmit }: QueryInputProps) => {
   const [isTyping, setIsTyping] = useState(false);
 
   const buttonVariants = {
@@ -44,6 +48,7 @@ const QueryInput = () => {
         {isTyping && (
           <motion.button
             key={isTyping ? "visible" : "hidden"}
+            onClick={onSubmit}
             className="btn absolute inset-y-2 right-1 flex items-center justify-center rounded-full border-none bg-transparent p-3"
             variants={buttonVariants}
             initial="hidden"
