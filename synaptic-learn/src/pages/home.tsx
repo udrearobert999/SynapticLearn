@@ -94,7 +94,7 @@ const HomePage = () => {
     <div className="flex h-screen flex-col pb-28">
       {isLoading ? (
         <div className="flex flex-grow items-center justify-center">
-          <span className="loading loading-infinity loading-lg"></span>
+          <span className="loading loading-spinner h-14 w-14"></span>
         </div>
       ) : articles.length === 0 ? (
         <div className="flex flex-grow items-center justify-center">
