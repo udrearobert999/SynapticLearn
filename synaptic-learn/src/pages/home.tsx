@@ -1,9 +1,10 @@
 import AppTitle from "@/components/app-title";
 import Article from "@/components/article";
 import QueryInput from "@/components/query-input";
+import SettingsButton from "@/components/settings-button";
 import { ArticleModel } from "@/models/article.model";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const articleList: ArticleModel[] = [
   {
@@ -38,9 +39,11 @@ const articleList: ArticleModel[] = [
 
 const HomePage = () => {
   const [articles, setArticles] = useState<ArticleModel[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   const onSubmitQuery = () => {
+    setIsLoading(true);
+
     setTimeout(() => {
       setArticles(articleList);
       setIsLoading(false);
@@ -89,7 +92,7 @@ const HomePage = () => {
 
   return (
     <div className="flex h-screen flex-col pb-28">
-      {isLoading ? ( // Check if it's still loading
+      {isLoading ? (
         <div className="flex flex-grow items-center justify-center">
           <span className="loading loading-infinity loading-lg"></span>
         </div>
@@ -100,8 +103,9 @@ const HomePage = () => {
       ) : (
         renderArticleResults()
       )}
-      <div className="fixed bottom-0 left-0 right-0 flex w-full justify-center border-t-2 border-gray-600/20 p-4">
+      <div className="fixed bottom-0 left-0 right-0 flex w-full items-center justify-center border-t-2 border-gray-600/20 p-4">
         <QueryInput onSubmit={onSubmitQuery} />
+        <SettingsButton />
       </div>
     </div>
   );

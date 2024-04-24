@@ -6,7 +6,7 @@ interface ArticleProps {
 }
 
 const Article = ({ article }: ArticleProps) => {
-  let { title, label, text, url } = article;
+  const { title, text, url } = article;
 
   const handleGoToPage = () => {
     window.location.href = url;

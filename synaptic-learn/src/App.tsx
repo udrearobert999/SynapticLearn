@@ -2,6 +2,7 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom";
 
 import HomePage from "@/pages/home";
 import PlotsPage from "@/pages/plots";
+import ModalProvider from "@/providers/modal-provider";
 
 const router = createBrowserRouter([
   {
@@ -15,7 +16,12 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <ModalProvider />
+      <RouterProvider router={router} />;
+    </>
+  );
 }
 
 export default App;
