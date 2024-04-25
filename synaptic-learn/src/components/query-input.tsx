@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SendHorizontal } from "lucide-react";
 
@@ -33,7 +33,7 @@ const QueryInput = ({ onSubmit }: QueryInputProps) => {
     },
   };
 
-  const handleInputChange = (e: FormEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setIsTyping(e.currentTarget.value.length > 0);
   };
 
