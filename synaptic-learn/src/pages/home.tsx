@@ -1,55 +1,44 @@
+import { axiosClient } from "@/axios";
 import AppTitle from "@/components/app-title";
 import Article from "@/components/article";
 import QueryInput from "@/components/query-input";
 import SettingsButton from "@/components/settings-button";
 import { useModal } from "@/hooks/use-modal-store";
+import { useSettingsStore } from "@/hooks/use-settings-store";
 import { ArticleModel } from "@/models/article.model";
 import { motion } from "framer-motion";
 import { useState } from "react";
-
-const articleList: ArticleModel[] = [
-  {
-    id: 1,
-    title: "Ecotype",
-    label: "Zoology",
-    url: "https://www.google.com/",
-    text: "In evolutionary ecology, an ecotype, sometimes called ecospecies, describes a genetically distinct geographic variety, population, or race within a species, which is genotypically adapted to specific environmental conditions.",
-  },
-  {
-    id: 2,
-    title: "Ecotype2",
-    label: "Zoology",
-    url: "https://www.google.com/",
-    text: "In evolutionary ecology, an ecotype, sometimes called ecospecies, describes a genetically distinct geographic variety, population, or race within a species, which is genotypically adapted to specific environmental conditions.",
-  },
-  {
-    id: 3,
-    title: "Ecotype3",
-    label: "Zoology",
-    url: "https://www.google.com/",
-    text: "In evolutionary ecology, an ecotype, sometimes called ecospecies, describes a genetically distinct geographic variety, population, or race within a species, which is genotypically adapted to specific environmental conditions.",
-  },
-  {
-    id: 4,
-    title: "Ecotype4",
-    label: "Zoology",
-    url: "https://www.google.com/",
-    text: "In evolutionary ecology, an ecotype, sometimes called ecospecies, describes a genetically distinct geographic variety, population, or race within a species, which is genotypically adapted to specific environmental conditions.",
-  },
-];
 
 const HomePage = () => {
   const [articles, setArticles] = useState<ArticleModel[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { onOpen } = useModal();
 
-  const onSubmitQuery = () => {
+  const { maxResults } = useSettingsStore();
+
+  const onSubmitQuery = async (query: string) => {
     setIsLoading(true);
 
-    setTimeout(() => {
-      setArticles(articleList);
+    console.log(maxResults);
+    try {
+      const req = await axiosClient.post(
+        "/recommend",
+        {
+          query: query,
+        },
+        {
+          params: {
+            maxResults: maxResults,
+          },
+        },
+      );
+
+      setArticles(req.data);
+    } catch (e) {
+      console.log(e);
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   const containerVariants = {
@@ -75,7 +64,7 @@ const HomePage = () => {
   };
   const renderArticleResults = () => {
     return (
-      <div className="flex h-full items-center justify-center overflow-y-auto">
+      <div className="flex h-full items-center justify-center overflow-y-auto py-20">
         <motion.div
           className="flex h-full w-1/2 flex-wrap items-center justify-center gap-8"
           variants={containerVariants}
@@ -105,7 +94,7 @@ const HomePage = () => {
       ) : (
         renderArticleResults()
       )}
-      <div className="fixed bottom-0 left-0 right-0 flex w-full items-center justify-center border-t-2 border-gray-600/20 p-4">
+      <div className="fixed bottom-0 left-0 right-0 flex w-full items-center justify-center border-t-2 border-gray-600 p-4">
         <QueryInput onSubmit={onSubmitQuery} />
         <SettingsButton onClick={() => onOpen("settings")} />
       </div>
