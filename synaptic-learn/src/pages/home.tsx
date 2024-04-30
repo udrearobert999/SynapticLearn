@@ -1,98 +1,72 @@
+import { useQuery } from "@tanstack/react-query";
 import { axiosClient } from "@/axios";
-import AppTitle from "@/components/app-title";
-import Article from "@/components/article";
 import QueryInput from "@/components/query-input";
 import SettingsButton from "@/components/settings-button";
 import { useModal } from "@/hooks/use-modal-store";
 import { useSettingsStore } from "@/hooks/use-settings-store";
 import { ArticleModel } from "@/models/article.model";
-import { motion } from "framer-motion";
 import { useState } from "react";
+import ArticlesResult from "@/components/articles-result";
+import AppTitle from "@/components/app-title";
+
+const fetchArticles = async (
+  query: string,
+  maxResults: number,
+): Promise<ArticleModel[]> => {
+  const response = await axiosClient.post(
+    "/similar-articles",
+    { query },
+    {
+      params: {
+        maxResults: maxResults,
+      },
+    },
+  );
+
+  return response.data;
+};
 
 const HomePage = () => {
-  const [articles, setArticles] = useState<ArticleModel[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [query, setQuery] = useState<string | null>(null);
   const { onOpen } = useModal();
-
   const { maxResults } = useSettingsStore();
 
-  const onSubmitQuery = async (query: string) => {
-    setIsLoading(true);
+  const {
+    data: articles,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery<ArticleModel[]>({
+    queryKey: ["articles", query, maxResults],
+    queryFn: () => fetchArticles(query ?? "", maxResults),
+    enabled: !!query,
+    refetchOnWindowFocus: false,
+  });
 
-    console.log(maxResults);
-    try {
-      const req = await axiosClient.post(
-        "/recommend",
-        {
-          query: query,
-        },
-        {
-          params: {
-            maxResults: maxResults,
-          },
-        },
-      );
-
-      setArticles(req.data);
-    } catch (e) {
-      console.log(e);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const containerVariants = {
-    hidden: { opacity: 1, scale: 0.5 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: {
-        staggerChildren: 0.15,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.5,
-      },
-    },
-  };
-  const renderArticleResults = () => {
-    return (
-      <div className="flex h-full items-center justify-center overflow-y-auto py-20">
-        <motion.div
-          className="flex h-full w-1/2 flex-wrap items-center justify-center gap-8"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {articles.map((article) => (
-            <motion.div key={article.id} variants={itemVariants}>
-              <Article article={article} />
-            </motion.div>
-          ))}
-        </motion.div>
-      </div>
-    );
+  const onSubmitQuery = (newQuery: string) => {
+    setQuery(newQuery);
+    if (isError) refetch();
   };
 
   return (
     <div className="flex h-[90dvh] w-dvw flex-col overflow-hidden">
-      {isLoading ? (
+      {isLoading && (
         <div className="flex flex-grow items-center justify-center">
           <span className="loading loading-spinner h-14 w-14"></span>
         </div>
-      ) : articles.length === 0 ? (
+      )}
+      {isError && (
+        <div className="flex flex-grow items-center justify-center">
+          <p>Error fetching articles! Please try again later!</p>
+        </div>
+      )}
+      {!articles && !isLoading && !isError && (
         <div className="flex flex-grow items-center justify-center">
           <AppTitle />
         </div>
-      ) : (
-        renderArticleResults()
+      )}
+      {!isLoading && !isError && articles && (
+        <ArticlesResult articles={articles} />
       )}
       <div className="fixed bottom-0 left-0 right-0 flex w-full items-center justify-center border-t-2 border-gray-600 p-4">
         <QueryInput onSubmit={onSubmitQuery} />

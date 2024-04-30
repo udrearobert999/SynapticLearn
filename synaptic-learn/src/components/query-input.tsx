@@ -1,48 +1,87 @@
-import { ChangeEvent, useRef, useState, FormEvent } from "react";
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { SendHorizontal } from "lucide-react";
+import { Paperclip, SendHorizontal, X } from "lucide-react";
 
-const buttonVariants = {
+const buttonsVariants = {
   hidden: {
-    x: "100%",
-    opacity: 0,
+    x: 50,
+    transition: {
+      type: "linear",
+      duration: 0.2,
+    },
   },
   visible: {
-    x: "0%",
-    opacity: 1,
+    x: 0,
     transition: {
-      type: "spring",
-      stiffness: 100,
-      duration: 0.1,
+      type: "linear",
+      duration: 0.2,
     },
   },
   exit: {
-    x: "0%",
-    opacity: 0,
+    x: 50,
     transition: {
-      easeOut: "linear",
-      duration: 0.1,
+      type: "linear",
+      duration: 0.2,
     },
   },
 };
 
 interface QueryInputProps {
-  onSubmit: (query: string) => void;
+  onSubmit: (query: string, file?: File) => void;
 }
 
 const QueryInput = ({ onSubmit }: QueryInputProps) => {
+  const [query, setQuery] = useState("");
+  const [displayText, setDisplayText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [file, setFile] = useState<File | undefined>(undefined);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    setIsTyping(Boolean(displayText));
+  }, [displayText]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setIsTyping(e.currentTarget.value.length > 0);
+    const newQuery = e.target.value;
+    setQuery(newQuery);
+    setDisplayText(newQuery);
   };
 
   const handleFormSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (inputRef.current) {
-      onSubmit(inputRef.current.value);
+    if (query) {
+      onSubmit(query);
     }
+  };
+
+  const handleFileInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (file) {
+      if (!file.name.toLowerCase().endsWith(".txt")) {
+        throw new Error("Please select a text file (.txt)");
+      }
+
+      setFile(file);
+      setDisplayText(file.name);
+      const reader = new FileReader();
+
+      reader.onload = (event) => {
+        const content = event.target?.result as string;
+        setQuery(content);
+      };
+
+      reader.readAsText(file);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setFile(undefined);
+    setDisplayText("");
+  };
+
+  const handleAddFile = () => {
+    fileInputRef.current?.click();
   };
 
   return (
@@ -51,26 +90,53 @@ const QueryInput = ({ onSubmit }: QueryInputProps) => {
       onSubmit={handleFormSubmit}
     >
       <input
-        className="input input-lg input-bordered w-full rounded-full pl-4 pr-20 focus:outline-none"
+        className={`input input-lg input-bordered w-full rounded-full pl-4 pr-28 focus:outline-none ${!file ? undefined : "font-bold"}`}
         placeholder="Search article..."
         onChange={handleInputChange}
-        ref={inputRef}
+        disabled={file !== undefined}
+        value={displayText}
         required
       />
+      <input
+        type="file"
+        className="hidden"
+        onChange={handleFileInputChange}
+        ref={fileInputRef}
+        accept=".txt"
+      />
       <AnimatePresence>
-        {isTyping && (
-          <motion.button
-            key={isTyping ? "visible" : "hidden"}
+        <motion.div
+          className="absolute inset-y-0 right-0 flex items-center space-x-1 pr-1"
+          variants={buttonsVariants}
+          initial="hidden"
+          animate={isTyping ? "visible" : "hidden"}
+          exit="exit"
+        >
+          {file !== undefined && (
+            <button
+              type="button"
+              className="btn flex items-center justify-center rounded-full border-none bg-transparent p-3"
+              onClick={handleRemoveFile}
+            >
+              <X />
+            </button>
+          )}
+          {file === undefined && (
+            <button
+              type="button"
+              className="btn flex items-center justify-center rounded-full border-none bg-transparent p-3"
+              onClick={handleAddFile}
+            >
+              <Paperclip />
+            </button>
+          )}
+          <button
             type="submit"
-            className="btn absolute inset-y-2 right-1 flex items-center justify-center rounded-full border-none bg-transparent p-3"
-            variants={buttonVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
+            className="btn flex items-center justify-center rounded-full border-none bg-transparent p-3"
           >
             <SendHorizontal />
-          </motion.button>
-        )}
+          </button>
+        </motion.div>
       </AnimatePresence>
     </form>
   );

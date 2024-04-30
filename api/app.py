@@ -25,7 +25,7 @@ nn_model = NearestNeighbors(n_neighbors=5, algorithm="auto", metric="cosine")
 nn_model.fit(embeddings)
 
 
-@app.route("/recommend", methods=["POST"])
+@app.route("/similar-articles", methods=["POST"])
 def recommend():
     content = request.get_json(silent=True)
     if not content or "query" not in content:

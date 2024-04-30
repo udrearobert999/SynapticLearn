@@ -1,11 +1,13 @@
 import { useModal } from "@/hooks/use-modal-store";
 import { useSettingsStore } from "@/hooks/use-settings-store";
-import { Moon, Sun } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Moon, Sun, Trash2 } from "lucide-react";
 import { ChangeEvent, useEffect } from "react";
 
 const SettingsModal = () => {
   const { isOpen, type, onClose } = useModal();
   const { theme, toggleTheme, maxResults, setMaxResults } = useSettingsStore();
+  const queryClient = useQueryClient();
 
   const isModalOpen = isOpen && type === "settings";
   useEffect(() => {
@@ -23,6 +25,10 @@ const SettingsModal = () => {
     const sliderValue = Number(e.currentTarget.value);
     const newMaxResults = sliderValue / 25 + 1;
     setMaxResults(newMaxResults);
+  };
+
+  const handleClearCache = () => {
+    queryClient.resetQueries();
   };
 
   return (
@@ -64,6 +70,16 @@ const SettingsModal = () => {
                   <span>4</span>
                 </div>
               </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <p>Clear cache</p>
+              <button
+                onClick={handleClearCache}
+                type="button"
+                className="btn flex items-center justify-center rounded-full border-none bg-transparent p-3"
+              >
+                <Trash2 />
+              </button>
             </div>
           </div>
         </div>
