@@ -1,28 +1,34 @@
+# app.py
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-from sklearn.neighbors import NearestNeighbors
+import torch
 from sentence_transformers import SentenceTransformer
 
-import numpy as np
 import pandas as pd
 import os
+import numpy as np
+
+from hnsw_manager import HNSWIndexManager
+from utils import set_seed, process_text
 
 app = Flask(__name__)
 CORS(app)
 
-base_dir = os.path.dirname(os.path.abspath(__file__))
+set_seed()
 
+base_dir = os.path.dirname(os.path.abspath(__file__))
 data_path = os.path.join(base_dir, "data", "wiki_train.xlsx")
 embeddings_path = os.path.join(base_dir, "embeddings", "wiki_train_embeddings.npy")
 
 data = pd.read_excel(data_path)
 embeddings = np.load(embeddings_path)
 
-model = SentenceTransformer("all-mpnet-base-v2")
+model = SentenceTransformer("multi-qa-mpnet-base-dot-v1")
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model = model.to(device)
 
-nn_model = NearestNeighbors(n_neighbors=5, algorithm="auto", metric="cosine")
-nn_model.fit(embeddings)
+hnsw_manager = HNSWIndexManager(embeddings)
 
 
 @app.route("/similar-articles", methods=["POST"])
@@ -36,21 +42,20 @@ def recommend():
     if max_results > 4:
         return jsonify({"error": "Max results should not exceed 4!"}), 400
 
-    query_embedding = model.encode([q_input], convert_to_tensor=False)
-    query_embedding = query_embedding.reshape(1, -1)
-
-    distances, indices = nn_model.kneighbors(query_embedding, n_neighbors=max_results)
+    processed_query = process_text(q_input)
+    query_embedding = model.encode([processed_query])[0]
+    ids, distances = hnsw_manager.query(query_embedding, k=max_results)
 
     best_fits = []
-    for index, distance in zip(indices[0], distances[0]):
+    for i, dist in zip(ids[0], distances[0]):
         best_fits.append(
             {
-                "id": int(index),
-                "title": data["Title"].iloc[index],
-                "label": data["label"].iloc[index],
-                "text": data["text"].iloc[index],
-                "url": data["URL"].iloc[index],
-                "distance": float(distance),
+                "id": int(i),
+                "title": data["Title"].values[i],
+                "label": data["Category"].values[i],
+                "text": data["Content"].values[i],
+                "url": data["URL"].values[i],
+                "distance": float(dist),
             }
         )
 

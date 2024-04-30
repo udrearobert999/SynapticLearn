@@ -78,6 +78,9 @@ const QueryInput = ({ onSubmit }: QueryInputProps) => {
   const handleRemoveFile = () => {
     setFile(undefined);
     setDisplayText("");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const handleAddFile = () => {
