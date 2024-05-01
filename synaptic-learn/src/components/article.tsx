@@ -13,14 +13,14 @@ const Article = ({ article }: ArticleProps) => {
   };
 
   return (
-    <div className="card -z-10 w-96 bg-neutral text-neutral-content shadow-xl">
+    <div className="card w-96 bg-neutral text-neutral-content shadow-xl">
       <div className="card-body flex gap-4">
         <div className="card-title flex items-center justify-between gap-4">
           <p className="flex-1 truncate font-bold">{title}</p>
           <span className="badge">{label}</span>
         </div>
         <p className="line-clamp-4">{text}</p>
-        <div className="card-actions justify-end">
+        <div className="card-actions z-20 justify-end">
           <button onClick={handleGoToPage} className="btn">
             Go <ArrowBigRight />
           </button>

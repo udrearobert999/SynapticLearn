@@ -93,7 +93,7 @@ const QueryInput = ({ onSubmit }: QueryInputProps) => {
       onSubmit={handleFormSubmit}
     >
       <input
-        className={`input input-lg input-bordered w-full rounded-full pl-4 pr-28 focus:outline-none ${!file ? undefined : "font-bold"}`}
+        className={`input input-lg input-bordered w-full rounded-full pl-4 pr-28 focus:outline-none ${!file ? undefined : "font-bolds"}`}
         placeholder="Search article..."
         onChange={handleInputChange}
         disabled={file !== undefined}

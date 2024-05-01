@@ -18,8 +18,8 @@ CORS(app)
 set_seed()
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
-data_path = os.path.join(base_dir, "data", "wiki_train.xlsx")
-embeddings_path = os.path.join(base_dir, "embeddings", "wiki_train_embeddings.npy")
+data_path = os.path.join(base_dir, "data", "data.xlsx")
+embeddings_path = os.path.join(base_dir, "embeddings", "embeddings.npy")
 
 data = pd.read_excel(data_path)
 embeddings = np.load(embeddings_path)
@@ -52,8 +52,8 @@ def recommend():
             {
                 "id": int(i),
                 "title": data["Title"].values[i],
-                "label": data["Category"].values[i],
-                "text": data["Content"].values[i],
+                "label": data["Label"].values[i],
+                "text": data["Text"].values[i],
                 "url": data["URL"].values[i],
                 "distance": float(dist),
             }
