@@ -68,7 +68,7 @@ const HomePage = () => {
       {!isLoading && !isError && articles && (
         <ArticlesResult articles={articles} />
       )}
-      <div className="fixed bottom-0 left-0 right-0 flex w-full items-center justify-center border-t-2 border-gray-600 p-4">
+      <div className="fixed bottom-0 left-0 right-0 flex min-h-28 w-full items-center justify-center border-t-2 border-gray-600/20 bg-base-100">
         <QueryInput onSubmit={onSubmitQuery} />
         <SettingsButton onClick={() => onOpen("settings")} />
       </div>
