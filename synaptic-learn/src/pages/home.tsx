@@ -8,6 +8,8 @@ import { ArticleModel } from "@/models/article.model";
 import { useState } from "react";
 import ArticlesResult from "@/components/articles-result";
 import AppTitle from "@/components/app-title";
+import { MoveRight } from "lucide-react";
+import { NavLink } from "react-router-dom";
 
 const fetchArticles = async (
   query: string,
@@ -49,7 +51,15 @@ const HomePage = () => {
   };
 
   return (
-    <div className="flex h-[90dvh] w-dvw flex-col overflow-hidden">
+    <div className="relative flex h-[90dvh] w-dvw flex-col overflow-hidden">
+      <button className="btn btn-primary absolute right-20 top-14 w-44 rounded-full">
+        <NavLink
+          to="/plots"
+          className="flex h-full w-full items-center justify-center gap-4"
+        >
+          See plots <MoveRight />
+        </NavLink>
+      </button>
       {isLoading && (
         <div className="flex flex-grow items-center justify-center">
           <span className="loading loading-spinner h-14 w-14"></span>

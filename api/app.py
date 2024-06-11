@@ -1,5 +1,5 @@
 # app.py
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
 import torch
@@ -19,6 +19,7 @@ set_seed()
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 data_path = os.path.join(base_dir, "data", "data.xlsx")
+plots_dir = os.path.join(base_dir, "plots")
 embeddings_path = os.path.join(base_dir, "embeddings", "embeddings.npy")
 
 data = pd.read_excel(data_path)
@@ -61,6 +62,13 @@ def recommend():
 
     return jsonify(best_fits)
 
+@app.route('/base-model-plot')
+def base_model_plot():
+    return send_from_directory(plots_dir, 'base_model_plot.html')
+
+@app.route('/trained-model-plot')
+def trained_model_plot():
+    return send_from_directory(plots_dir, 'trained_model_plot.html')
 
 if __name__ == "__main__":
     app.run(debug=True)
